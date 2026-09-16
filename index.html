@@ -12,11 +12,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PDF.js library to render PDFs natively in canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
     
-    /* Security: Disable Text Selection */
     * {
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -25,11 +26,8 @@
       -webkit-touch-callout: none;
     }
 
-    /* Anti-Print Protection */
     @media print {
-      body {
-        display: none !important;
-      }
+      body { display: none !important; }
     }
 
     body {
@@ -59,8 +57,6 @@
     .glow-cyan {
       box-shadow: 0 0 50px -15px rgba(56, 189, 248, 0.22);
     }
-
-    /* Watermark Pattern */
     .watermark-overlay {
       background-image: repeating-linear-gradient(
         -45deg,
@@ -70,17 +66,9 @@
         transparent 200px
       );
     }
-
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #06080d;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1e293b;
-      border-radius: 999px;
-    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #06080d; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 999px; }
   </style>
 </head>
 <body class="selection:bg-none" oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
@@ -97,12 +85,7 @@
     <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="relative w-9 h-9 rounded-full overflow-hidden border border-cyan-400/50 shadow-md">
-          <img 
-            id="navAvatar"
-            src="profile.jpg" 
-            alt="Satpal Swami Avatar" 
-            class="w-full h-full object-cover object-top pointer-events-none"
-          />
+          <img src="profile.jpg" alt="Satpal Swami Avatar" class="w-full h-full object-cover object-top pointer-events-none" />
         </div>
         <div>
           <span class="text-lg font-bold tracking-tight text-white">SATPAL<span class="text-cyan-400">.</span></span>
@@ -144,19 +127,13 @@
         </p>
       </div>
 
-      <!-- 3D Card -->
       <div class="relative mt-12 w-full max-w-2xl mx-auto" style="perspective: 1200px;">
         <div id="tiltCard" class="hero-card-3d glass-card rounded-3xl p-6 sm:p-8 glow-cyan relative overflow-hidden">
           
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
             <div class="sm:col-span-5 flex flex-col items-center">
               <div class="relative w-48 h-60 rounded-2xl overflow-hidden border-2 border-cyan-400/40 shadow-2xl bg-slate-900 group">
-                <img 
-                  id="mainProfileImg"
-                  src="profile.jpg" 
-                  alt="Satpal Swami" 
-                  class="w-full h-full object-cover object-top filter contrast-105 transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                />
+                <img src="profile.jpg" alt="Satpal Swami" class="w-full h-full object-cover object-top filter contrast-105 transition-transform duration-500 group-hover:scale-105 pointer-events-none" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
                 <div class="absolute bottom-2.5 left-2.5 right-2.5 flex justify-between items-center text-[10px] mono text-white">
                   <span class="bg-cyan-500/80 px-2 py-0.5 rounded backdrop-blur">SATPAL SWAMI</span>
@@ -467,7 +444,7 @@
       </div>
     </section>
 
-    <!-- DISPATCH & CONTACT (Updated with satpalswami22742@gmail.com) -->
+    <!-- DISPATCH & CONTACT -->
     <section id="contact" class="py-24 max-w-5xl mx-auto px-6">
       <div class="glass-card rounded-3xl p-8 sm:p-12 relative overflow-hidden border border-white/10">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -512,9 +489,9 @@
 
   </main>
 
-  <!-- SECURE FULL-SCREEN DOCUMENT VIEWER MODAL -->
-  <div id="docViewerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-2 sm:p-6">
-    <div class="w-full max-w-5xl h-full flex flex-col glass-card rounded-2xl overflow-hidden border border-cyan-500/30">
+  <!-- SECURE NATIVE CANVAS PDF VIEWER MODAL (Bypasses Chrome iframe block) -->
+  <div id="docViewerModal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-2 sm:p-6">
+    <div class="w-full max-w-4xl h-full flex flex-col glass-card rounded-2xl overflow-hidden border border-cyan-500/30">
       
       <div class="flex items-center justify-between px-6 py-3 border-b border-white/10 bg-[#06080d]/90">
         <div class="flex items-center gap-2">
@@ -522,24 +499,23 @@
           <span id="modalDocTitle" class="text-xs sm:text-sm font-bold text-white mono">Protected Certificate</span>
           <span class="mono text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 ml-2">READ-ONLY</span>
         </div>
-        <button onclick="closeViewer()" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-all flex items-center gap-1">
-          <i data-lucide="x" class="w-4 h-4"></i> Close
-        </button>
+        <div class="flex items-center gap-3">
+          <span id="pageInfo" class="text-xs mono text-slate-400">Page 1 of 1</span>
+          <button onclick="closeViewer()" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-all flex items-center gap-1">
+            <i data-lucide="x" class="w-4 h-4"></i> Close
+          </button>
+        </div>
       </div>
 
-      <div class="relative flex-1 w-full bg-slate-950 overflow-hidden">
+      <!-- Canvas Rendering Container with Watermark Protection -->
+      <div class="relative flex-1 w-full bg-slate-950 overflow-auto flex items-center justify-center p-4">
         <div class="absolute inset-0 pointer-events-none watermark-overlay z-20 flex flex-wrap items-center justify-around opacity-30 select-none">
           <span class="mono text-xs font-bold text-cyan-400 rotate-[-30deg]">CONFIDENTIAL &bull; SATPAL SWAMI</span>
           <span class="mono text-xs font-bold text-cyan-400 rotate-[-30deg]">CONFIDENTIAL &bull; SATPAL SWAMI</span>
           <span class="mono text-xs font-bold text-cyan-400 rotate-[-30deg]">CONFIDENTIAL &bull; SATPAL SWAMI</span>
         </div>
 
-        <iframe 
-          id="pdfFrame" 
-          src="" 
-          class="w-full h-full border-0 z-10"
-          sandbox="allow-scripts allow-same-origin"
-        ></iframe>
+        <canvas id="pdfCanvas" class="shadow-2xl rounded max-w-full z-10"></canvas>
       </div>
 
     </div>
@@ -578,51 +554,54 @@
       });
     }
 
+    // PDF.js Native Rendering Engine Setup
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
     const modal = document.getElementById('docViewerModal');
-    const pdfFrame = document.getElementById('pdfFrame');
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
     const modalTitle = document.getElementById('modalDocTitle');
 
     function openViewer(pdfFileName, docName) {
       modalTitle.innerText = docName;
-      pdfFrame.src = encodeURI(pdfFileName) + "#toolbar=0&navpanes=0&scrollbar=0";
       modal.classList.remove('hidden');
+
+      // Load PDF using PDF.js to avoid browser frame blocks
+      pdfjsLib.getDocument(pdfFileName).promise.then(pdfDoc => {
+        pdfDoc.getPage(1).then(page => {
+          const viewport = page.getViewport({ scale: 1.5 });
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+          };
+          page.render(renderContext);
+        });
+      }).catch(err => {
+        alert("Error loading document. Ensure the PDF file is uploaded correctly in your repository.");
+      });
     }
 
     function closeViewer() {
       modal.classList.add('hidden');
-      pdfFrame.src = "";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        alert('Notice: Printing of protected maritime certificates is disabled.');
-        return false;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 's' || e.key.toLowerCase() === 'u')) {
         e.preventDefault();
         return false;
       }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') {
+      if (e.key === 'F12' || e.key === 'PrintScreen') {
         e.preventDefault();
-        return false;
-      }
-      if (e.key === 'F12') {
-        e.preventDefault();
-        return false;
-      }
-      if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
-        alert('Notice: Screen capture restricted for protected document security.');
+        alert('Notice: Security protection active.');
       }
     });
 
-    window.addEventListener('blur', () => {
-      document.body.style.filter = "blur(10px)";
-    });
-    window.addEventListener('focus', () => {
-      document.body.style.filter = "none";
-    });
+    window.addEventListener('blur', () => { document.body.style.filter = "blur(10px)"; });
+    window.addEventListener('focus', () => { document.body.style.filter = "none"; });
   </script>
 </body>
 </html>
